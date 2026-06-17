@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CSE Smart Quiz Portal</title>
+<style>
+body{font-family:Arial;background:linear-gradient(135deg,#667eea,#764ba2);padding:20px}
+.container{max-width:900px;margin:auto;background:#fff;padding:25px;border-radius:15px}
+input,select,button{width:100%;padding:10px;margin:8px 0}
+button{background:#667eea;color:white;border:none;border-radius:20px}
+.hidden{display:none}
+.correct{color:green;font-weight:bold}
+.wrong{color:red;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="container" id="studentScreen">
+<h1>🎓 CSE Smart Quiz Portal</h1>
+<input id="name" placeholder="Student Name">
+<input id="div" placeholder="Division">
+
+<select id="year" onchange="updateSubjects()">
+<option value="">Select Year</option>
+<option value="FY">FY</option>
+<option value="SY">SY</option>
+<option value="TY">TY</option>
+</select>
+
+<select id="subject">
+<option value="">Select Subject</option>
+</select>
+
+<button onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div class="container hidden" id="quizScreen">
+<h2 id="studentInfo"></h2>
+<div id="quiz"></div>
+</div>
+
+<script>
+const subjectMap={
+FY:["C","CN","C++"],
+SY:["Java","Python","DSA"],
+TY:["AI","ML"]
+};
+
+function updateSubjects(){
+ let y=document.getElementById("year").value;
+ let s=document.getElementById("subject");
+ s.innerHTML="<option value=''>Select Subject</option>";
+ if(!subjectMap[y]) return;
+ subjectMap[y].forEach(sub=>{
+  let o=document.createElement("option");
+  o.value=sub;o.text=sub;s.appendChild(o);
+ });
+}
+
+function makeQuestions(subject){
+ let arr=[];
+ for(let i=1;i<=10;i++){
+   arr.push([subject+" Question "+i+"?",["Option A","Option B","Option C","Option D"],"Option A"]);
+ }
+ return arr;
+}
+
+const questionBank={
+"C":[
+["Who developed C language?", ["Dennis Ritchie","James Gosling","Guido","Bjarne"], "Dennis Ritchie"],
+["Which symbol is used for pointer?", ["*","&","#","@"], "*"],
+["Which loop runs at least once?", ["for","while","do-while","if"], "do-while"],
+["Header file for printf?", ["stdio.h","conio.h","math.h","string.h"], "stdio.h"],
+["Size of int depends on?", ["OS","Compiler","RAM","CPU"], "Compiler"],
+["Keyword used to return value?", ["return","break","goto","exit"], "return"],
+["Array index starts from?", ["0","1","-1","2"], "0"],
+["Which is not a C data type?", ["int","float","char","real"], "real"],
+["Function used to read input?", ["scanf","printf","gets","puts"], "scanf"],
+["C is a ___ language?", ["Procedural","OOP","Markup","Database"], "Procedural"]
+],
+"CN":[
+["OSI layers count?", ["5","6","7","8"], "7"],
+["Routing is done by?", ["Network","Physical","Transport","Session"], "Network"],
+["TCP is?", ["Connection-oriented","Connectionless","Fast","Simple"], "Connection-oriented"],
+["Email protocol?", ["SMTP","FTP","HTTP","SNMP"], "SMTP"],
+["IPv4 address bits?", ["32","16","64","128"], "32"],
+["HTTP stands for?", ["HyperText Transfer Protocol","High Transfer Text Protocol","Host Transfer Protocol","None"], "HyperText Transfer Protocol"],
+["DNS converts?", ["Names to IP","IP to Names","Files","Emails"], "Names to IP"],
+["Device connecting networks?", ["Router","Hub","Switch","Bridge"], "Router"],
+["Top OSI layer?", ["Application","Network","Transport","Data Link"], "Application"],
+["URL stands for?", ["Uniform Resource Locator","Universal Resource Link","Unique Resource Locator","None"], "Uniform Resource Locator"]
+],
+"C++":[
+["Who developed C++?", ["Bjarne Stroustrup","Dennis Ritchie","Guido","James Gosling"], "Bjarne Stroustrup"],
+["C++ supports?", ["OOP","Only Procedural","Only Functional","None"], "OOP"],
+["File extension of C++?", [".cpp",".c",".java",".py"], ".cpp"],
+["Output stream object?", ["cout","cin","printf","scanf"], "cout"],
+["Input stream object?", ["cin","cout","print","input"], "cin"],
+["Scope resolution operator?", ["::",".","->","#"], "::"],
+["Object is an instance of?", ["Class","Function","Array","Pointer"], "Class"],
+["Constructor is called?", ["Automatically","Manually","Never","Twice"], "Automatically"],
+["STL stands for?", ["Standard Template Library","System Template Library","Static Template Library","None"], "Standard Template Library"],
+["Inheritance access specifier?", ["public","extends","inherit","super"], "public"]
+],
+"Java":[
+["Java is ___ language.", ["Procedural","Object-Oriented","Assembly","Machine"], "Object-Oriented"],
+["Entry point method?", ["start()","run()","main()","init()"], "main()"],
+["Keyword for inheritance?", ["extends","implements","super","this"], "extends"],
+["JVM stands for?", ["Java Virtual Machine","Java Variable Method","Joint VM","None"], "Java Virtual Machine"],
+["Multiple inheritance using?", ["Interface","Class","Object","Package"], "Interface"],
+["Java source file extension?", [".java",".py",".cpp",".js"], ".java"],
+["Keyword used to create object?", ["new","create","make","object"], "new"],
+["Parent class reference?", ["super","this","base","parent"], "super"],
+["Java is platform ___?", ["Independent","Dependent","Hardware","None"], "Independent"],
+["Package is used to?", ["Organize classes","Compile code","Run code","Store data"], "Organize classes"]
+],
+"Python":[
+["Creator of Python?", ["Guido van Rossum","Dennis Ritchie","James Gosling","Elon Musk"], "Guido van Rossum"],
+["Comment symbol?", ["#","//","/*","--"], "#"],
+["Which is immutable?", ["Tuple","List","Set","Dict"], "Tuple"],
+["Function keyword?", ["def","func","define","function"], "def"],
+["Python is ___ typed.", ["Dynamic","Static","Weak","None"], "Dynamic"],
+["Dictionary stores?", ["Key-Value pairs","Numbers","Strings","Arrays"], "Key-Value pairs"],
+["len() function returns?", ["Length","Type","Value","Index"], "Length"],
+["Method to add item in list?", ["append","push","add","insertall"], "append"],
+["Python file extension?", [".py",".java",".cpp",".html"], ".py"],
+["Which is a loop?", ["for","switch","goto","case"], "for"]
+],
+"DSA":[
+["Binary Search complexity?", ["O(log n)","O(n)","O(n²)","O(1)"], "O(log n)"],
+["LIFO structure?", ["Stack","Queue","Tree","Graph"], "Stack"],
+["FIFO structure?", ["Queue","Stack","Array","Tree"], "Queue"],
+["Root node belongs to?", ["Tree","Array","Stack","Queue"], "Tree"],
+["Linear data structure?", ["Array","Tree","Graph","Heap"], "Array"],
+["Insertion in stack?", ["Push","Pop","Peek","Delete"], "Push"],
+["Removal from stack?", ["Pop","Push","Peek","Delete"], "Pop"],
+["Maximum children in binary tree?", ["2","1","3","4"], "2"],
+["Best search in sorted array?", ["Binary Search","Linear Search","DFS","BFS"], "Binary Search"],
+["Graph traversal algorithm?", ["BFS","Compiler","Parser","Loader"], "BFS"]
+],
+"AI":[
+["AI stands for?", ["Artificial Intelligence","Artificial Internet","Auto Input","None"], "Artificial Intelligence"],
+["Machine Learning is subset of?", ["AI","CN","DBMS","OS"], "AI"],
+["Turing Test is used for?", ["Machine Intelligence","Networking","Database","OS"], "Machine Intelligence"],
+["Robot perception uses?", ["Sensors","Printers","Speakers","RAM"], "Sensors"],
+["Expert systems use?", ["Knowledge Base","RAM","Cache","GPU"], "Knowledge Base"],
+["Chess-playing computer is example of?", ["AI","Compiler","Network","DBMS"], "AI"],
+["NLP stands for?", ["Natural Language Processing","Network Layer Protocol","New Logic Program","None"], "Natural Language Processing"],
+["State Space Search is used in?", ["AI","HTML","SQL","CSS"], "AI"],
+["Goal of AI?", ["Simulate Intelligence","Increase RAM","Compile Code","Store Data"], "Simulate Intelligence"],
+["Shortest path in unweighted graph?", ["BFS","DFS","Hill Climbing","Genetic"], "BFS"]
+],
+"ML":[
+["ML stands for?", ["Machine Learning","Machine Logic","Mega Learning","None"], "Machine Learning"],
+["Supervised learning algorithm?", ["Linear Regression","K-Means","Apriori","PCA"], "Linear Regression"],
+["K-Means is?", ["Clustering","Classification","Regression","Sorting"], "Clustering"],
+["Dataset split commonly uses?", ["Train/Test","Read/Write","Input/Output","None"], "Train/Test"],
+["Overfitting means?", ["Memorizing Training Data","Low Accuracy","No Training","Compression"], "Memorizing Training Data"],
+["Target variable is called?", ["Label","Feature","Tuple","Node"], "Label"],
+["Decision Tree is used for?", ["Prediction","Printing","Storage","Networking"], "Prediction"],
+["Model performance metric?", ["Accuracy","Voltage","Speed","Pixels"], "Accuracy"],
+["Feature means?", ["Input Variable","Output Variable","Grade","Class"], "Input Variable"],
+["Unsupervised learning example?", ["K-Means","Linear Regression","Decision Tree","Logistic Regression"], "K-Means"]
+]
+};
+
+let score=0;
+
+function startQuiz(){
+ const name=document.getElementById("name").value;
+ const div=document.getElementById("div").value;
+ const year=document.getElementById("year").value;
+ const subject=document.getElementById("subject").value;
+
+ if(!name||!div||!year||!subject){
+   alert("Fill all details");
+   return;
+ }
+
+ document.getElementById("studentScreen").classList.add("hidden");
+ document.getElementById("quizScreen").classList.remove("hidden");
+ document.getElementById("studentInfo").innerText=
+ `Name: ${name} | Division: ${div} | Year: ${year} | Subject: ${subject}`;
+
+ const quiz=document.getElementById("quiz");
+ quiz.innerHTML="";
+
+ questionBank[subject].forEach((q,i)=>{
+   let html=`<div><p><b>${i+1}. ${q[0]}</b></p>`;
+   q[1].forEach(op=>{
+      html+=`<label><input type="radio" name="q${i}" value="${op}"> ${op}</label><br>`;
+   });
+   html+=`</div><hr>`;
+   quiz.innerHTML+=html;
+ });
+
+ quiz.innerHTML+=`<button onclick="submitQuiz('${subject}')">Submit Quiz</button>`;
+}
+
+function submitQuiz(subject){
+ score=0;
+ questionBank[subject].forEach((q,i)=>{
+   const ops=document.getElementsByName("q"+i);
+   for(let op of ops){
+      if(op.checked && op.value===q[2]) score++;
+   }
+ });
+
+ let percentage=(score/10)*100;
+ let grade="D";
+ if(percentage>=90) grade="A+ 🏆";
+ else if(percentage>=80) grade="A ⭐";
+ else if(percentage>=70) grade="B 👍";
+ else if(percentage>=60) grade="C 🙂";
+
+ document.getElementById("quizScreen").innerHTML=`
+ <h2>🎉 Quiz Completed</h2>
+ <h3>Score: ${score}/10</h3>
+ <h3>Percentage: ${percentage}%</h3>
+ <h3>Grade: ${grade}</h3>
+ <button onclick="location.reload()">Restart</button>`;
+}
+</script>
+</body>
+</html>
