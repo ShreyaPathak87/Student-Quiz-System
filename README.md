@@ -7,8 +7,8 @@
 </h3>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/HTML5-Frontend-orange?logo=html5">
-  <img src="https://img.shields.io/badge/CSS3-Styling-blue?logo=css3">
+  <img src="https://img.shields.io/badge/HTML-Frontend-orange?logo=html5">
+  <img src="https://img.shields.io/badge/CSS-Styling-blue?logo=css3">
   <img src="https://img.shields.io/badge/JavaScript-Logic-yellow?logo=javascript">
   <img src="https://img.shields.io/badge/Status-Completed-success">
 </p>
